@@ -79,3 +79,22 @@ input[type='submit'].full-width {
 .NewGrudge-input {
   width: 100%;
 }
+
+.button {
+  cursor: pointer;
+}
+
+.button.disabled {
+  pointer-events: none;
+  opacity: .5;
+}
+
+.undo-button {
+  margin-right: .5rem;
+}
+
+.undo-redo-container {
+  display: flex;
+  margin-top: 1rem;
+  justify-content: flex-end;
+}

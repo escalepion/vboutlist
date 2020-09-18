@@ -5,10 +5,15 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
+    "classnames": "^2.2.6",
     "random-name": "0.1.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
+    "react-redux": "^7.2.1",
     "react-scripts": "3.0.1",
+    "redux": "^4.0.5",
+    "redux-saga": "^1.1.3",
+    "redux-undo": "^1.0.1",
     "uuid": "3.3.2"
   },
   "devDependencies": {
