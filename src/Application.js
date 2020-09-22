@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useState } from 'react';
 
 import id from 'uuid/v4';
-
-import { ADD_GRUDGE, TOGGLE_FORGIVENESS } from './sagas/types';
 import Grudges from './Grudges';
 import NewGrudge from './NewGrudge';
 import UndoRedo from './containers/undoRedo';
@@ -11,29 +8,50 @@ import UndoRedo from './containers/undoRedo';
 import initialState from './initialState';
 
 const Application = (props) => {
-  const [grudges, setGrudges] = useState(initialState);
+  const [history, setHistory] = useState({ past: [], present: [...initialState], future: [] });
 
   const addGrudge = (grudge) => {
     grudge.id = id();
     grudge.forgiven = false;
-    props.dispatch({ type: ADD_GRUDGE, payload: grudge });
+    setHistory({ past: [ ...history.past, history.present ], present: [ grudge, ...history.present ], future: [] });
   };
 
   const toggleForgiveness = (id) => {
-    props.dispatch({ type: TOGGLE_FORGIVENESS, payload: { id } });
+    const currentGrudges = history.present;
+    const mappedGrudges = currentGrudges.map((grudge) => {
+      if (grudge.id !== id) return grudge;
+      return { ...grudge, forgiven: !grudge.forgiven };
+    });
+    setHistory({ past: [ ...history.past, history.present ], present: [ ...mappedGrudges ], future: [] });
+  };
+
+  const handleUndo = () => {
+    const currentHistory = history;
+    const { past = [], present = [], future = [] } = currentHistory;
+    if (past.length) {
+      const previous = past[past.length - 1];
+      const newPast = past.slice(0, past.length - 1);
+      setHistory({ past: newPast, present: previous, future: [ present, ...future ] });
+    };
+  };
+
+  const handleRedo = () => {
+    const currentHistory = history;
+    const { past = [], present = [], future = [] } = currentHistory;
+    if (future.length) {
+      const next = future[0];
+      const newFuture = future.slice(1);
+      setHistory({ past: [ ...past, present ], present: next, future: newFuture });
+    }
   };
 
   return (
     <div className="Application">
       <NewGrudge onSubmit={addGrudge} />
-      <UndoRedo />
-      <Grudges grudges={props.grudges} onForgive={toggleForgiveness} />
+      <UndoRedo handleRedo={handleRedo} handleUndo={handleUndo} canUndo={!!history.past.length} canRedo={!!history.future.length} />
+      <Grudges grudges={history.present} onForgive={toggleForgiveness} />
     </div>
   );
 };
 
-const mapStateToProps = (state) => {
-  return { grudges: state.addedGrudges.present.grudges };
-};
-
-export default connect(mapStateToProps, null)(Application);
+export default Application;
